@@ -95,6 +95,8 @@ export interface MergedSettings {
     readonly guests?: readonly { name: string; sessionDir: string; repo?: string }[];
     /** Issue #141: written by hand, never by the input; kept as it was. */
     readonly president?: GuildSettings['president'];
+    /** The GitHub Enterprise Server host: written by hand like `president`; kept as it was. */
+    readonly host?: GuildSettings['host'];
   };
   /** How many rows of `branchPrefixes` were kept from the starting settings. */
   readonly keptBranchPrefixes: number;
@@ -226,6 +228,7 @@ export function mergeSettings(
   const chosen = guestsToWrite(base, guests);
   return {
     raw: {
+      ...(base.host === undefined ? {} : { host: base.host }),
       ...company.raw,
       ruleChangePaths: base.ruleChangePaths,
       ...(chosen === undefined ? {} : { guests: chosen }),

@@ -33,6 +33,20 @@ export function createGhRunner(signal?: AbortSignal): GhRunner {
     });
 }
 
+/**
+ * The runner for the company's repository on a GitHub Enterprise Server host (`host` in the
+ * settings): `--hostname <host>` goes right after `api`, as its own argument. Without a host the
+ * runner is returned as is (github.com). Every company call is a `gh api` one.
+ */
+export function ghOnHost(gh: GhRunner, host: string | undefined): GhRunner {
+  if (host === undefined) return gh;
+  return (args) => {
+    const [command, ...rest] = args;
+    if (command !== 'api') return gh(args);
+    return gh(['api', '--hostname', host, ...rest]);
+  };
+}
+
 function parseJsonLine(line: string): unknown {
   try {
     return JSON.parse(line);

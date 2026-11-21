@@ -9,7 +9,7 @@ import { COLLECTOR_CONFIG } from '../collector.config.ts';
 import { parseCliArgs } from './args.ts';
 import { collectSnapshot } from './collect.ts';
 import { CollectorError, errorKind } from './errors.ts';
-import { parseOrThrow } from './gh.ts';
+import { ghOnHost, parseOrThrow } from './gh.ts';
 import {
   createGuestLoop,
   fetchGuestsOnce,
@@ -51,7 +51,12 @@ async function fetchGithub(deps: RunDeps, now: Date): Promise<GithubResult> {
   try {
     return {
       ok: true,
-      ...(await collectSnapshot(deps.gh, COLLECTOR_CONFIG.repo, now, COLLECTOR_CONFIG)),
+      ...(await collectSnapshot(
+        ghOnHost(deps.gh, COLLECTOR_CONFIG.host),
+        COLLECTOR_CONFIG.repo,
+        now,
+        COLLECTOR_CONFIG,
+      )),
     };
   } catch (error) {
     return { ok: false, kind: errorKind(error) };
@@ -144,7 +149,11 @@ export async function collectOnce(deps: RunDeps): Promise<{
 }
 
 function checkRepoLabels(deps: RunDeps): Promise<LabelCheck> {
-  return checkLabels(deps.gh, COLLECTOR_CONFIG.repo, COLLECTOR_CONFIG.labels.departments);
+  return checkLabels(
+    ghOnHost(deps.gh, COLLECTOR_CONFIG.host),
+    COLLECTOR_CONFIG.repo,
+    COLLECTOR_CONFIG.labels.departments,
+  );
 }
 
 /** Writes the status file; false when it could not. */

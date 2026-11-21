@@ -4,6 +4,7 @@ import { CollectorError } from './errors.ts';
 import {
   ghApiProjected,
   ghApiProjectedPage,
+  ghOnHost,
   parseJsonLines,
   parseOrThrow,
   projectionFilter,
@@ -90,5 +91,38 @@ describe('ghApiProjectedPage', () => {
     expect(calls).toEqual([
       ['api', '--jq', projectionFilter('{n: .number}'), 'repos/a/b/issues?per_page=100'],
     ]);
+  });
+});
+
+describe('ghOnHost', () => {
+  function recorder(): GhRunner & { calls: (readonly string[])[] } {
+    const calls: (readonly string[])[] = [];
+    const run: GhRunner = (args) => {
+      calls.push(args);
+      return Promise.resolve('');
+    };
+    return Object.assign(run, { calls });
+  }
+
+  it('returns the same runner without a host (github.com)', () => {
+    const gh = recorder();
+    expect(ghOnHost(gh, undefined)).toBe(gh);
+  });
+
+  it('puts --hostname right after api, as its own argument', async () => {
+    const gh = recorder();
+    const onHost = ghOnHost(gh, 'github.example.com');
+    await onHost(['api', '--paginate', '--jq', '.', 'repos/a/b/issues']);
+    await onHost(['api', 'graphql', '-f', 'owner=a']);
+    expect(gh.calls).toEqual([
+      ['api', '--hostname', 'github.example.com', '--paginate', '--jq', '.', 'repos/a/b/issues'],
+      ['api', '--hostname', 'github.example.com', 'graphql', '-f', 'owner=a'],
+    ]);
+  });
+
+  it('leaves calls that are not gh api as they are', async () => {
+    const gh = recorder();
+    await ghOnHost(gh, 'github.example.com')(['repo', 'view', 'a/b']);
+    expect(gh.calls).toEqual([['repo', 'view', 'a/b']]);
   });
 });

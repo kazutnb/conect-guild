@@ -51,6 +51,8 @@ export function sessionSeatsOf(settings: SessionDirSettings, home: string): Seat
 // repository root (src/main.ts chooses).
 export const COLLECTOR_CONFIG = {
   repo: GUILD_SETTINGS.repo,
+  // The GitHub Enterprise Server host of `repo`; undefined for github.com. Guests stay on github.com.
+  host: GUILD_SETTINGS.host,
   // Branch name prefix → department, for the history (the branch names themselves are not kept).
   branchPrefixes: GUILD_SETTINGS.branchPrefixes,
   // Issue #141: the label of the king's Issues; undefined without `president` in the settings.

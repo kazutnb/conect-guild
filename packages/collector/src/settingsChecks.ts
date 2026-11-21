@@ -1,7 +1,7 @@
 import { statSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import type { GuildSettings } from '@conect-guild/snapshot/settingsSchema';
-import type { GhRunner } from './gh.ts';
+import { ghOnHost, type GhRunner } from './gh.ts';
 import { expandHome } from './home.ts';
 import { checkLabels, type LabelCheck } from './labels.ts';
 import { quote } from './settingsText.ts';
@@ -178,5 +178,6 @@ function labelWarnings(check: LabelCheck, settings: GuildSettings): string[] {
 
 /** The department labels of `settings` against the repository's, through gh. Never throws. */
 export async function checkRepoLabels(gh: GhRunner, settings: GuildSettings): Promise<string[]> {
-  return labelWarnings(await checkLabels(gh, settings.repo, settings.departments), settings);
+  const company = ghOnHost(gh, settings.host);
+  return labelWarnings(await checkLabels(company, settings.repo, settings.departments), settings);
 }

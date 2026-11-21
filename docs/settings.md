@@ -31,7 +31,7 @@ cp guild.settings.json guild.settings.local.json
 
 ### 項目
 
-書き換える項目は次の 6 つと、任意の `guests`（[3 章](#3-お客さんを足す任意)）・`president` です。
+書き換える項目は次の 6 つと、任意の `guests`（[3 章](#3-お客さんを足す任意)）・`president`・`host` です。
 
 | 項目 | 中身 |
 |---|---|
@@ -42,6 +42,7 @@ cp guild.settings.json guild.settings.local.json
 | `branchPrefixes` | ブランチ名の接頭辞（`prefix`）→ 部門のラベル（`department`）。部門ラベルの付いた Issue に結べない PR の担当を推定する。上から順に見て、ブランチ名が最初に当てはまったものを使う |
 | `ruleChangePaths` | 変えると社長の承認が要るファイル。`exact`（パスが等しい）・`suffix`（で終わる）・`prefix`（で始まる）の 3 種類で書き、glob は使えない。既定は `CLAUDE.md`・`/CLAUDE.md` で終わるもの・`.claude/agents/` で始まるもの。そのままでよければ変えない |
 | `president` | 任意。王様（社長）がやる Issue の印のラベル（例 `{ "label": "社長" }`）。下の「王様のクエスト」を見る |
+| `host` | 任意。`repo` が GitHub Enterprise Server にあるときのホスト名（例 `"github.example.com"`）。下の「GitHub Enterprise Server のリポジトリ」を見る |
 
 **王様のクエスト（`president`）**
 
@@ -52,6 +53,14 @@ cp guild.settings.json guild.settings.local.json
 - 足したら `npm run dev:all` を起動し直します。無ければ、この欄と行は出ません
 - ラベルは自分で作ります（`gh label create 社長 -R <owner/name>`）
 - collector は、このラベルがリポジトリにあるかを照合しません。部門のラベルと違い、帯もログも出ません。書き間違えても気づけず、王様のクエストが空のままになります
+
+**GitHub Enterprise Server のリポジトリ（`host`）**
+
+- 無ければ github.com です。`repo` が社内などの GitHub Enterprise Server にあるときだけ、そのホスト名を書きます（`https://` やポート、パスは付けません。`github.com` は書けません）
+- collector と `settings:write` は、会社のリポジトリを `gh api --hostname <host> …` で読みます。そのホストに `gh auth login -h <host>` でログインしておきます
+- お客さん（`guests`）のリポジトリは github.com のままです
+- `/guild-setup` と `settings:write` は書きません。`guild.settings.local.json` に手で足します。`settings:write` は、いまの設定の `host` をそのまま保ちます
+- 足したら `npm run dev:all` を起動し直します
 
 ### 例
 

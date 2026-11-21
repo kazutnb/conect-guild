@@ -12,6 +12,14 @@ export function isRepoName(text: string): boolean {
 }
 
 /**
+ * A GitHub Enterprise Server host name such as `github.example.com`: lower-case DNS labels joined
+ * by dots, at least two labels, no scheme, port, path or user. It goes to `gh --hostname` as one
+ * argument of the array, never through a shell. `github.com` itself is refused: leave `host` out.
+ */
+const HOST_PATTERN =
+  /^(?!github\.com$)(?=.{4,253}$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/;
+
+/**
  * The member ids. They stay fixed: the sprites (`assets/sprites/<id>.png`), the hands and the
  * lines are keyed by them. kaname is the 司令塔 and yukihiro the president; the others may sit at
  * the department desks (`departments[i].member`), and one no department names stays off stage.
@@ -199,6 +207,9 @@ const presidentSchema = z.strictObject({ label: z.string().min(1) });
 export const guildSettingsSchema = z
   .strictObject({
     repo: z.string().regex(REPO_PATTERN, 'owner/name'),
+    // The GitHub Enterprise Server host of `repo` (e.g. `github.example.com`); left out, github.com.
+    // Written by hand like `president`; settings:write keeps it. Guests stay on github.com.
+    host: z.string().regex(HOST_PATTERN, 'host name such as github.example.com').optional(),
     // Only the members on stage are required (checked below): かなめ, the king and each
     // department's member.
     members: z.partialRecord(memberIdSchema, memberSchema),
